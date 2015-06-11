@@ -1,21 +1,28 @@
 package com.pre.mobile.grability;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,9 +86,9 @@ public class PostAdapter  extends ArrayAdapter {
 
         View listItemView = convertView;
 
-        //comprobando si el View existe
+        //comprobando si el View no  existe
 
-        if(null == convertView){
+       /* if(null == convertView){
             //Si no existe, entonces inflarlo
 
             listItemView = layoutInflater.inflate(R.layout.post,
@@ -91,8 +98,84 @@ public class PostAdapter  extends ArrayAdapter {
             //procesar item
 
 
-        }
+        }*/
+
+        listItemView = null == convertView ? layoutInflater.inflate(
+                R.layout.post,
+                parent,
+                false):convertView;
+
+        // Obtener el item actual
+
+        Post item = items.get(position);
+
+        //Obtener Views
+        TextView textoTitulo = (TextView)listItemView.findViewById(R.id.textoTitulo);
+        TextView textoDescripcion = (TextView)listItemView.findViewById(R.id.textoDescripcion);
+        final ImageView imagenPost = (ImageView)listItemView.findViewById(R.id.imagePost);
+
+
+
+        //Actualizar los Views
+        textoTitulo.setText(item.getTitulo());
+        textoDescripcion.setText(item.getDescripcion());
+
+
+        //Petición para obtener la imagen
+
+        ImageRequest request = new ImageRequest(
+                URL_BASE + item.getImagen(),
+                new Response.Listener<Bitmap>(){
+                    @Override
+                    public void onResponse(Bitmap bitmap){
+                        imagenPost.setImageBitmap(bitmap);
+                    }
+                }, 0 , 0, null,null,
+                new Response.ErrorListener(){
+                    public void onErrorResponse(VolleyError error){
+                      //  imagenPost.setImageResource(R.drawable.error);
+                        Log.d(TAG,"Error en respuesta Bitmap: "+error.getMessage());
+                    }
+                }
+            );
+
+        //Añadir petición a la cola
+        requestQueue.add(request);
         return listItemView;
+    }
+
+    public List<Post> parseJson(JSONObject response){
+
+        //Variables Locales
+        List<Post> posts = new ArrayList();
+        JSONArray jsonArray = null;
+
+        try {
+            // Obtener el array del objeto
+            jsonArray = response.getJSONArray("items");
+
+            for(int i=0; i<jsonArray.length(); i++){
+
+                try {
+                    JSONObject objeto= jsonArray.getJSONObject(i);
+
+                    Post post = new Post(
+                            objeto.getString("titulo"),
+                            objeto.getString("descripcion"),
+                            objeto.getString("imagen"));
+
+
+                    posts.add(post);
+
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error de parsing: "+ e.getMessage());
+                }
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return posts;
     }
 
 }
