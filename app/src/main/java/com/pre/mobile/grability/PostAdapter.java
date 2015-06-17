@@ -32,21 +32,20 @@ public class PostAdapter  extends ArrayAdapter {
 
     //Atributos
     private RequestQueue requestQueue;
-    private static final String URL_BASE="http://servidorexterno.site90.com/datos";
-    private static final String URL_JSON="/social_media.json";
-    private static final String TAG= "PostAdapter";
+    JsonObjectRequest jsArrayRequest;
+    private static final String URL_BASE = "http://servidorexterno.site90.com/datos";
+    private static final String URL_JSON = "/social_media.json";
+    private static final String TAG = "PostAdapter";
     List<Post> items;
-
-
-
-
 
     public PostAdapter(Context context){
         super(context,0);
+
         //gestionar petición del archivo JSON
         requestQueue= Volley.newRequestQueue(context);
+        Log.d(TAG,"PostAdapter(Context context");
 
-        JsonObjectRequest jsArrayRequest = new JsonObjectRequest(
+        jsArrayRequest = new JsonObjectRequest(
                 Request.Method.GET,
                 URL_BASE + URL_JSON,
                 null,
@@ -64,16 +63,11 @@ public class PostAdapter  extends ArrayAdapter {
                     }
                 }
         );
-
         requestQueue.add(jsArrayRequest);
-
-
-
     }
 
     @Override
     public int getCount(){
-
         return items != null ? items.size() : 0;
     }
 
@@ -84,7 +78,7 @@ public class PostAdapter  extends ArrayAdapter {
 
         //Salvando la referencia del View de la fila
 
-        View listItemView = convertView;
+        View listItemView;// = convertView;
 
         //comprobando si el View no  existe
 
@@ -99,7 +93,7 @@ public class PostAdapter  extends ArrayAdapter {
 
 
         }*/
-
+        //Comprobando si el View no existe
         listItemView = null == convertView ? layoutInflater.inflate(
                 R.layout.post,
                 parent,
